@@ -59,7 +59,7 @@ def printData():
         print(k.addr,v.value)# addr; count of events
 
 try:
-    sleep(3)
+    sleep(10)
     printData()
 except KeyboardInterrupt:
     printData()
