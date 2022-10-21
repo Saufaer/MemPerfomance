@@ -1,17 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pathlib
+import sys
 
 class Histogram:
-    def __init__(self, filename, access_size, skip_access_count):
+    def __init__(self, filename, access_size, first_skip_access_count, last_skip_access_count):
         self.filename = filename
+        self.address_count = 0
         self.access_size = access_size
-        self.skip_access_count = skip_access_count
+        self.first_skip_access_count = first_skip_access_count
+        self.last_skip_access_count = last_skip_access_count
         self.linspace_left = 0
         self.linspace_right = 0
 
     def GetArray(self):
         with open(self.filename, 'r') as f:
           lines = f.readlines()
+        self.address_count = len(lines)
         lines = [line.replace(' ', '') for line in lines]  
         with open(self.filename, 'w') as f:  
             f.writelines(lines)  
@@ -37,8 +42,12 @@ class Histogram:
         mem_sizes = self.GetMemSizes()
         uniq_sizes, freq = np.unique(mem_sizes, return_counts=True)
 
-        uniq_sizes = uniq_sizes[self.skip_access_count:]
-        freq = freq[self.skip_access_count:]
+        uniq_sizes = uniq_sizes[self.first_skip_access_count:]
+        freq = freq[self.first_skip_access_count:]
+
+        if self.last_skip_access_count!=0:
+            uniq_sizes = uniq_sizes[:-self.last_skip_access_count]
+            freq = freq[:-self.last_skip_access_count]
 
         self.linspace_left = uniq_sizes[0]
         self.linspace_right = uniq_sizes[-1]
@@ -86,19 +95,26 @@ class Histogram:
             # create max lines histogram
             plt.plot(uniq_freq_size, uniq_freq)
 
+        plt.yscale('log')
+
+        testInfo = self.filename.split('-')
+        
         access_ticks = np.linspace(self.linspace_left, self.linspace_right, 5)
         labels = [str(sub) + ' KB' for sub in access_ticks]
         plt.xticks(access_ticks, labels)
-    
+
         plt.xlabel('Addresses ('+ str(access_size) +' KB)')
         plt.ylabel('Accesses')
-        plt.title('Histogram sorted by number of accesses')
-        plt.savefig(filename +'_hist.png')
+
+        plt.title('Histogram sorted by number of accesses, \n test name = ' + str(testInfo[1]) +', raw addresses = ' + str(self.address_count))
+        plt.savefig(self.filename +'_hist.png')
     
 
-filename = 'out_addr_36'
+filename = str(sys.argv[1])
 access_size = 4 # count of KB for associated with 1 memory access
-skip_access_count = 45 # count of first minimum memory accesses for skipping (e.g. skip 4KB, 8KB, .. 100KB and save other)
-x = Histogram(filename, access_size, skip_access_count)
+first_skip_access_count = 0 # count of first minimum memory accesses for skipping (e.g. skip 4KB, 8KB, .. 100KB and save other)
+last_skip_access_count = 0 # count of last maximum memory accesses for skipping
+
+x = Histogram(filename, access_size, first_skip_access_count, last_skip_access_count)
 
 x.PlotHistogram(True, True) # lines=True, points=True

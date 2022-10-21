@@ -56,7 +56,8 @@ except Exception:
 def printData():
     counts = b.get_table("counts")   
     for k, v  in counts.items():
-        print(k.addr,v.value)# addr; count of events
+        #print(k.addr,v.value)# addr; count of events
+        print(v.value)# count of events
 
 try:
     sleep(10)
