@@ -46,7 +46,7 @@ try:
     event_attr.sample_type = PerfEventSampleFormat.ADDR
     #event_attr.sample_type = int("7df",16) # PERF_SAMPLE_ADDR
 
-    event_attr.sample_period = 3
+    event_attr.sample_period = 1003
     event_attr.precise_ip = 2
     b.attach_perf_event_raw(attr=event_attr, fn_name=b"on_sample_hit", pid=-1, cpu=-1)
 except Exception:
