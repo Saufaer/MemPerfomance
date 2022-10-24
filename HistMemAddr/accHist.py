@@ -41,7 +41,7 @@ class Histogram:
         print("The accesses is: ", accesses)
         return accesses
 
-    def PlotHistogram(self, lines=True, points=False): 
+    def PlotHistogram(self, lines=True, points=False, xscale=True, yscale=False): 
         accesses = self.GetAddrAccess()       
         address_bytes = np.arange(self.linspace_left, self.linspace_right , self.access_size)
 
@@ -57,13 +57,13 @@ class Histogram:
             # create max lines histogram
             plt.plot(address_bytes, accesses)
 
-        plt.xscale('log')
-        #plt.yscale('log')
-
-        #access_ticks = np.linspace(self.linspace_left, self.linspace_right, 2, endpoint=True)
-        access_ticks = np.logspace(np.log10(self.linspace_left), np.log10(self.linspace_right), 7, dtype = int)
-        labels = [str(sub) + ' B' for sub in access_ticks]
-        plt.xticks(access_ticks, labels)
+        if xscale:
+            plt.xscale('log')        
+            access_ticks = np.logspace(np.log10(self.linspace_left), np.log10(self.linspace_right), 7, dtype = int)
+            labels = [str(sub) + ' B' for sub in access_ticks]
+            plt.xticks(access_ticks, labels)
+        if yscale:
+            plt.yscale('log')
 
         plt.xlabel('Addresses ('+ str(access_size) +' Bytes)')
         plt.ylabel('Accesses')
@@ -79,4 +79,4 @@ first_skip_access_count = 40 # count of first minimum memory accesses for skippi
 last_skip_access_count = 0 # count of last maximum memory accesses for skipping
 
 x = Histogram(filename, access_size, first_skip_access_count, last_skip_access_count)
-x.PlotHistogram(True, True) # lines=True, points=True
+x.PlotHistogram(lines=True, points=True, xscale=True, yscale=False)
