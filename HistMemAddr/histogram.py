@@ -95,13 +95,14 @@ class Histogram:
             # create max lines histogram
             plt.plot(uniq_freq_size, uniq_freq)
 
-        plt.yscale('log')
+        plt.xscale('log')
+        #plt.yscale('log')
 
         testInfo = self.filename.split('-')
         
-        access_ticks = np.linspace(self.linspace_left, self.linspace_right, 5)
-        labels = [str(sub) + ' KB' for sub in access_ticks]
-        plt.xticks(access_ticks, labels)
+        #access_ticks = np.linspace(self.linspace_left, self.linspace_right, 5)
+        #labels = [str(sub) + ' KB' for sub in access_ticks]
+        #plt.xticks(access_ticks, labels)
 
         plt.xlabel('Addresses ('+ str(access_size) +' KB)')
         plt.ylabel('Accesses')
