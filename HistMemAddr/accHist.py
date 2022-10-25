@@ -2,18 +2,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import os
+import argparse
 
-class Histogram:
-    def __init__(self, filename, access_size = 4, measure=' Kb', first_skip_access_count=0, last_skip_access_count=0, extremum_size=-1):
+class HistogramWssData:
+    def __init__(self, filename, access_size = 4, measure=' Kb', left_skip_access_count=0, right_skip_access_count=0, extremum_size=-1):
         self.filename = filename # file with raw memory addresses, filename = <prefix>-<testname>
         self.testInfo = self.filename.split('-')
         if len(self.testInfo) < 2:
             print("incorrect filename template, please use: <prefix>-<testname>")
-            exit()
-        self.access_size = access_size # count of measure associated with 1 memory access on OX
+            exit(1)
+        self.access_size = access_size # size of measure associated with 1 memory access on OX
         self.measure = measure # unit of measure for the amount of memory on OX
-        self.first_skip_access_count = first_skip_access_count # number of first memory accesses to skip while drawing
-        self.last_skip_access_count = last_skip_access_count # number of recent memory accesses to skip while drawing
+        self.left_skip_access_count = left_skip_access_count # number of first memory accesses to skip while drawing
+        self.right_skip_access_count = right_skip_access_count # number of last memory accesses to skip while drawing
         self.extremum_size = extremum_size # point on OX for drawing straight lines around extremum, should be a multiple of access_size value
         self.address_count = 0 
         self.linspace_left = 0
@@ -39,17 +41,17 @@ class Histogram:
         addresses = values[count_sort_ind]
         accesses = counts[count_sort_ind]
 
-        self.linspace_left = (self.first_skip_access_count + 1) * self.access_size
-        self.linspace_right = (len(accesses) + 1 - self.last_skip_access_count) * self.access_size
-        if self.first_skip_access_count != 0:
-            accesses = accesses[self.first_skip_access_count:]
-        if self.last_skip_access_count != 0:
-            accesses = accesses[:-self.last_skip_access_count]
+        self.linspace_left = (self.left_skip_access_count + 1) * self.access_size
+        self.linspace_right = (len(accesses) + 1 - self.right_skip_access_count) * self.access_size
+        if self.left_skip_access_count != 0:
+            accesses = accesses[self.left_skip_access_count:]
+        if self.right_skip_access_count != 0:
+            accesses = accesses[:-self.right_skip_access_count]
         print("The addresses is: ", addresses)
         print("The accesses is: ", accesses)
         return accesses
 
-    def PlotHistogram(self, lines=True, points=False, xscale=True, yscale=False, extremum=False): 
+    def PlotHistogram(self, lines=True, points=False, xscale=True, yscale=False): 
         accesses = self.GetAddrAccess()       
         address_sizes = np.arange(self.linspace_left, self.linspace_right , self.access_size)
 
@@ -78,7 +80,7 @@ class Histogram:
         if yscale:
             plt.yscale('log')
 
-        if extremum and self.extremum_size !=-1:
+        if self.extremum_size !=-1:
             if extremum_size % self.access_size != 0:
                 print("Plot extremum lines, incorrect condition: extremum_size should be a multiple of access_size value, skip")
             else:
@@ -96,15 +98,31 @@ class Histogram:
         print("Saving a histogram: ", hist_name)
 
 
-filename = str(sys.argv[1])
-access_size = 4
+parser = argparse.ArgumentParser("HWSW-36",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("-f", "--file", type=str, required=True, metavar="file_path",
+    help='File with memory addresses.')
+parser.add_argument("-s", "--size", type=int, default=4,
+    help='Size of measure associated with 1 memory access')
+parser.add_argument("-sl", "--skip_left", type=int, default=0,
+    help='Number of first memory accesses to skip while drawing')
+parser.add_argument("-sr", "--skip_right", type=int, default=0,
+    help='Number of last memory accesses to skip while drawing')
+parser.add_argument("-e", "--extremum", type=int, default=-1,
+    help='Point on OX for drawing straight lines around extremum, should be a multiple of size value. Can be found by hands.')
+args = parser.parse_args()
+
+data_file = args.file
+filename = data_file.rsplit("/")[-1]
+if not os.path.isfile(data_file):
+    print("Invalid file path: {0}".format(data_file))
+    exit(1)
+
+access_size = args.size
 measure = ' Kb'
-first_skip_access_count = 0
-last_skip_access_count = 0
-extremum_size = 1536
+left_skip_access_count = args.skip_left
+right_skip_access_count = args.skip_right
+extremum_size = args.extremum
 
-#x = Histogram(filename)
-#x.PlotHistogram()
-
-x = Histogram(filename, access_size, measure, first_skip_access_count, last_skip_access_count, extremum_size)
-x.PlotHistogram(lines=True, points=True, xscale=True, yscale=True, extremum=True)
+x = HistogramWssData(filename, access_size, measure, left_skip_access_count, right_skip_access_count, extremum_size)
+x.PlotHistogram(lines=True, points=True, xscale=True, yscale=True)
