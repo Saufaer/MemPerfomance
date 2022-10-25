@@ -103,7 +103,7 @@ parser = argparse.ArgumentParser("HWSW-36",
 parser.add_argument("-f", "--file", type=str, required=True, metavar="file_path",
     help='File with memory addresses.')
 parser.add_argument("-s", "--size", type=int, default=4,
-    help='Size of measure associated with 1 memory access')
+    help='Size of measure in Kb associated with 1 memory access')
 parser.add_argument("-sl", "--skip_left", type=int, default=0,
     help='Number of first memory accesses to skip while drawing')
 parser.add_argument("-sr", "--skip_right", type=int, default=0,
