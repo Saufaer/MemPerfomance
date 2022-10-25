@@ -78,12 +78,15 @@ class Histogram:
         if yscale:
             plt.yscale('log')
 
-        if extremum and extremum_size != -1:
-            size_point = self.extremum_size
-            accesses_point = accesses[np.where(address_sizes==size_point)]
-            plt.axvline(x=size_point, color='b', ls='--', lw=0.5, label='size = ' + str(size_point) + self.measure)
-            plt.axhline(y=accesses_point, color='g', ls='--', lw=0.5, label='accesses = ' + str(accesses_point)[1:-1])
-            plt.legend(bbox_to_anchor = (1.0, 1), loc = 'upper center')
+        if extremum and self.extremum_size !=-1:
+            if extremum_size % self.access_size != 0:
+                print("Plot extremum lines, incorrect condition: extremum_size should be a multiple of access_size value, skip")
+            else:
+                size_point = self.extremum_size
+                accesses_point = accesses[np.where(address_sizes==size_point)]
+                plt.axvline(x=size_point, color='b', ls='--', lw=0.5, label='size = ' + str(size_point) + self.measure)
+                plt.axhline(y=accesses_point, color='g', ls='--', lw=0.5, label='accesses = ' + str(accesses_point)[1:-1])
+                plt.legend(bbox_to_anchor = (1.0, 1), loc = 'upper center')
 
         plt.xlabel('Size ('+ str(access_size) +' Kb)')
         plt.ylabel('Accesses')
@@ -99,6 +102,9 @@ measure = ' Kb'
 first_skip_access_count = 0
 last_skip_access_count = 0
 extremum_size = 1536
+
+#x = Histogram(filename)
+#x.PlotHistogram()
 
 x = Histogram(filename, access_size, measure, first_skip_access_count, last_skip_access_count, extremum_size)
 x.PlotHistogram(lines=True, points=True, xscale=True, yscale=True, extremum=True)
